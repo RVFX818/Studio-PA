@@ -28,7 +28,7 @@ const config = {
         process.env.INFO_CHANNEL_ID,
 
       youtubeAlerts:
-        process.env.YOUTUBE_ALERT_CHANNEL_ID,
+        process.env.ANNOUNCEMENTS_CHANNEL_ID,
     },
   },
 
@@ -95,7 +95,7 @@ const config = {
       process.env.YOUTUBE_CHANNEL_ID,
 
     discordChannelId:
-      process.env.YOUTUBE_ALERT_CHANNEL_ID,
+      process.env.ANNOUNCEMENTS_CHANNEL_ID,
 
     checkIntervalMs:
       5 * MINUTE,
@@ -176,3 +176,4 @@ module.exports = {
     DAY,
   },
 };
+

@@ -130,7 +130,7 @@ function buildFaqEmbeds() {
         [
           "Use **#general-chat** for conversations about Renaissance VFX, our projects, community updates, and related topics.",
           "",
-          "Use **#off-topic** for casual conversations that aren't directly related to RVFX or our projects.",
+          "Use **#off-topic-chat** for casual conversations that aren't directly related to RVFX or our projects.",
           "",
           "Please keep all community spaces respectful, friendly, and welcoming.",
         ].join("\n")

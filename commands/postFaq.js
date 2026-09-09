@@ -7,15 +7,15 @@ const isAdmin =
   require("../utils/isAdmin");
 
 const {
-  syncInfoMessage,
-} = require("../services/infoMessage");
+  syncFaqMessage,
+} = require("../services/faqMessage");
 
 module.exports = {
   data:
     new SlashCommandBuilder()
-      .setName("post-info")
+      .setName("post-faq")
       .setDescription(
-        "Update the Renaissance VFX info message"
+        "Update the RVFX Studio FAQ message"
       ),
 
   async execute(interaction) {
@@ -26,29 +26,27 @@ module.exports = {
         return interaction.reply({
           content:
             "You do not have permission to use this command.",
-
           flags:
             MessageFlags.Ephemeral,
         });
       }
 
       const result =
-        await syncInfoMessage(
+        await syncFaqMessage(
           interaction.client
         );
 
       await interaction.reply({
         content:
           result.created
-            ? "Info message created."
-            : "Info message updated.",
-
+            ? "FAQ message created."
+            : "FAQ message updated.",
         flags:
           MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error(
-        "Failed to sync info message:",
+        "Failed to sync FAQ message:",
         error
       );
 
@@ -58,8 +56,7 @@ module.exports = {
       ) {
         await interaction.reply({
           content:
-            "Failed to update the info message.",
-
+            "Failed to update the FAQ message.",
           flags:
             MessageFlags.Ephemeral,
         });

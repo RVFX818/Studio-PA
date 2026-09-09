@@ -35,19 +35,27 @@ const {
   startYouTubeAlerts,
 } = require("./services/youtubeAlerts");
 
+const {
+  syncInfoMessage,
+} = require("./services/infoMessage");
+
+const {
+  syncRulesMessage,
+} = require("./services/rulesMessage");
+
+const {
+  syncFaqMessage,
+} = require("./services/faqMessage");
+
 validateCoreConfig();
 
 const client =
   new Client({
     intents: [
       GatewayIntentBits.Guilds,
-
       GatewayIntentBits.GuildMembers,
-
       GatewayIntentBits.GuildMessages,
-
       GatewayIntentBits.MessageContent,
-
       GatewayIntentBits.AutoModerationExecution,
     ],
   });
@@ -58,6 +66,39 @@ client.once(
     await ready.execute(
       readyClient
     );
+
+    try {
+      await syncInfoMessage(
+        readyClient
+      );
+    } catch (error) {
+      console.error(
+        "Startup info sync failed:",
+        error
+      );
+    }
+
+    try {
+      await syncRulesMessage(
+        readyClient
+      );
+    } catch (error) {
+      console.error(
+        "Startup rules sync failed:",
+        error
+      );
+    }
+
+    try {
+      await syncFaqMessage(
+        readyClient
+      );
+    } catch (error) {
+      console.error(
+        "Startup FAQ sync failed:",
+        error
+      );
+    }
 
     startYouTubeAlerts(
       readyClient

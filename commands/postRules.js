@@ -7,15 +7,15 @@ const isAdmin =
   require("../utils/isAdmin");
 
 const {
-  syncInfoMessage,
-} = require("../services/infoMessage");
+  syncRulesMessage,
+} = require("../services/rulesMessage");
 
 module.exports = {
   data:
     new SlashCommandBuilder()
-      .setName("post-info")
+      .setName("post-rules")
       .setDescription(
-        "Update the Renaissance VFX info message"
+        "Update the Renaissance VFX rules message"
       ),
 
   async execute(interaction) {
@@ -26,29 +26,27 @@ module.exports = {
         return interaction.reply({
           content:
             "You do not have permission to use this command.",
-
           flags:
             MessageFlags.Ephemeral,
         });
       }
 
       const result =
-        await syncInfoMessage(
+        await syncRulesMessage(
           interaction.client
         );
 
       await interaction.reply({
         content:
           result.created
-            ? "Info message created."
-            : "Info message updated.",
-
+            ? "Rules message created."
+            : "Rules message updated.",
         flags:
           MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error(
-        "Failed to sync info message:",
+        "Failed to sync rules message:",
         error
       );
 
@@ -58,8 +56,7 @@ module.exports = {
       ) {
         await interaction.reply({
           content:
-            "Failed to update the info message.",
-
+            "Failed to update the rules message.",
           flags:
             MessageFlags.Ephemeral,
         });

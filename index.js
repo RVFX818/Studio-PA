@@ -6,66 +6,95 @@ const {
   Events,
 } = require("discord.js");
 
-const ready = require("./events/ready");
-const interactionCreate = require("./events/interactionCreate");
-const guildMemberAdd = require("./events/guildMemberAdd");
-const guildMemberUpdate = require("./events/guildMemberUpdate");
-const guildMemberRemove = require("./events/guildMemberRemove");
-const messageCreate = require("./events/messageCreate");
+const {
+  validateCoreConfig,
+} = require("./config/studioConfig");
 
-const autoModerationActionExecution = require(
-  "./events/autoModerationActionExecution"
-);
+const ready =
+  require("./events/ready");
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.AutoModerationExecution,
-  ],
-});
+const interactionCreate =
+  require("./events/interactionCreate");
+
+const guildMemberAdd =
+  require("./events/guildMemberAdd");
+
+const guildMemberUpdate =
+  require("./events/guildMemberUpdate");
+
+const guildMemberRemove =
+  require("./events/guildMemberRemove");
+
+const messageCreate =
+  require("./events/messageCreate");
+
+const autoModerationActionExecution =
+  require("./events/autoModerationActionExecution");
+
+const {
+  startYouTubeAlerts,
+} = require("./services/youtubeAlerts");
+
+validateCoreConfig();
+
+const client =
+  new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+
+      GatewayIntentBits.GuildMembers,
+
+      GatewayIntentBits.GuildMessages,
+
+      GatewayIntentBits.MessageContent,
+
+      GatewayIntentBits.AutoModerationExecution,
+    ],
+  });
 
 client.once(
   Events.ClientReady,
-  (...args) => ready.execute(...args)
+  async (readyClient) => {
+    await ready.execute(
+      readyClient
+    );
+
+    startYouTubeAlerts(
+      readyClient
+    );
+  }
 );
 
 client.on(
   Events.InteractionCreate,
-  (...args) =>
-    interactionCreate.execute(...args)
+  interactionCreate.execute
 );
 
 client.on(
   Events.GuildMemberAdd,
-  (...args) =>
-    guildMemberAdd.execute(...args)
+  guildMemberAdd.execute
 );
 
 client.on(
   Events.GuildMemberUpdate,
-  (...args) =>
-    guildMemberUpdate.execute(...args)
+  guildMemberUpdate.execute
 );
 
 client.on(
   Events.GuildMemberRemove,
-  (...args) =>
-    guildMemberRemove.execute(...args)
+  guildMemberRemove.execute
 );
 
 client.on(
   Events.MessageCreate,
-  (...args) =>
-    messageCreate.execute(...args)
+  messageCreate.execute
 );
 
 client.on(
   Events.AutoModerationActionExecution,
-  (...args) =>
-    autoModerationActionExecution.execute(...args)
+  autoModerationActionExecution.execute
 );
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(
+  process.env.DISCORD_TOKEN
+);

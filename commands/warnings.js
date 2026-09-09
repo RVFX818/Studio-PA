@@ -1,18 +1,28 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require("discord.js");
 
 const isAdmin = require("../utils/isAdmin");
 
 const {
   getUserRecord,
-} = require("../utils/moderationStore");
+} = require("../stores/moderationStore");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("warnings")
+    .setDescription("View a member's warning history")
+    .addUserOption((option) =>
+      option
+        .setName("member")
+        .setDescription("Member to view")
+        .setRequired(true)
+    ),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
         return interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -36,7 +46,7 @@ module.exports = {
 
             return (
               `**${warnings.length - index}.** ${warning.reason}\n` +
-              `Moderator: <@${warning.moderatorId}> • ` +
+              `Moderator: <@${warning.moderatorId}> ï¿½ ` +
               `<t:${timestamp}:R>\n` +
               `ID: \`${warning.id}\``
             );
@@ -70,13 +80,13 @@ module.exports = {
           }
         )
         .setFooter({
-          text: "Studio PA • Moderation History",
+          text: "Studio PA ï¿½ Moderation History",
         })
         .setTimestamp();
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Warnings command failed:", error);
@@ -84,7 +94,7 @@ module.exports = {
       if (!interaction.replied) {
         await interaction.reply({
           content: "Failed to load moderation history.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

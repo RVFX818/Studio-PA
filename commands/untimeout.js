@@ -1,20 +1,39 @@
 const {
   EmbedBuilder,
+  MessageFlags,
+  SlashCommandBuilder,
 } = require("discord.js");
 
 const isAdmin = require("../utils/isAdmin");
 
 const {
   addModAction,
-} = require("../utils/moderationStore");
+} = require("../stores/moderationStore");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("untimeout")
+    .setDescription("Remove a member timeout")
+    .addUserOption((option) =>
+      option
+        .setName("member")
+        .setDescription("Member to remove timeout from")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for removing the timeout")
+        .setRequired(false)
+        .setMaxLength(500)
+    ),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
         return interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -34,7 +53,7 @@ module.exports = {
         return interaction.reply({
           content:
             "I cannot modify that member.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -85,7 +104,7 @@ module.exports = {
           )
           .setFooter({
             text:
-              "Studio PA • Moderation",
+              "Studio PA ï¿½ Moderation",
           })
           .setTimestamp();
 
@@ -97,7 +116,7 @@ module.exports = {
       await interaction.reply({
         content:
           `Removed timeout from ${targetUser}.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error(
@@ -112,7 +131,7 @@ module.exports = {
         await interaction.reply({
           content:
             "Failed to remove the timeout.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

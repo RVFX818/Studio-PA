@@ -1,18 +1,34 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require("discord.js");
 const isAdmin = require("../utils/isAdmin");
 
 const {
   removeWarning,
   addModAction,
-} = require("../utils/moderationStore");
+} = require("../stores/moderationStore");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("remove-warning")
+    .setDescription("Remove one warning from a member")
+    .addUserOption((option) =>
+      option
+        .setName("member")
+        .setDescription("Member whose warning should be removed")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("warning-id")
+        .setDescription("Warning ID to remove")
+        .setRequired(true)
+    ),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
         return interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -28,7 +44,7 @@ module.exports = {
       if (!result) {
         return interaction.reply({
           content: `No warning with ID \`${warningId}\` was found for ${user}.`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -83,7 +99,7 @@ module.exports = {
             }
           )
           .setFooter({
-            text: "Studio PA • Moderation",
+            text: "Studio PA ï¿½ Moderation",
           })
           .setTimestamp();
 
@@ -96,7 +112,7 @@ module.exports = {
         content:
           `Removed warning \`${warningId}\` from ${user}. ` +
           `They now have **${result.count} warning(s)**.`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error(
@@ -107,7 +123,7 @@ module.exports = {
       if (!interaction.replied) {
         await interaction.reply({
           content: "Failed to remove that warning.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

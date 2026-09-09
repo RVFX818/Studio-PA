@@ -1,17 +1,27 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require("discord.js");
 const isAdmin = require("../utils/isAdmin");
 
 const {
   getUserRecord,
-} = require("../utils/moderationStore");
+} = require("../stores/moderationStore");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("mod-history")
+    .setDescription("View a member's full moderation history")
+    .addUserOption((option) =>
+      option
+        .setName("member")
+        .setDescription("Member to view")
+        .setRequired(true)
+    ),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
         return interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -39,8 +49,8 @@ module.exports = {
             );
 
             return (
-              `• **${warning.reason}**\n` +
-              `  Moderator: <@${warning.moderatorId}> • ` +
+              `ï¿½ **${warning.reason}**\n` +
+              `  Moderator: <@${warning.moderatorId}> ï¿½ ` +
               `<t:${timestamp}:R>\n` +
               `  ID: \`${warning.id}\``
             );
@@ -58,7 +68,7 @@ module.exports = {
             );
 
             return (
-              `• **${offense.ruleName || "Unknown Rule"}**\n` +
+              `ï¿½ **${offense.ruleName || "Unknown Rule"}**\n` +
               `  Channel: ${
                 offense.channelId
                   ? `<#${offense.channelId}>`
@@ -84,7 +94,7 @@ module.exports = {
               );
 
               return (
-                `• **${offense.type || "Unknown Violation"}**\n` +
+                `ï¿½ **${offense.type || "Unknown Violation"}**\n` +
                 `  Channel: ${
                   offense.channelId
                     ? `<#${offense.channelId}>`
@@ -121,7 +131,7 @@ module.exports = {
             }
 
             return (
-              `• **${action.type}**` +
+              `ï¿½ **${action.type}**` +
               `${durationText}\n` +
               `  Moderator: ${
                 action.moderatorId
@@ -133,7 +143,7 @@ module.exports = {
               }\n` +
               `  Source: ${
                 action.source || "Unknown"
-              } • <t:${timestamp}:R>`
+              } ï¿½ <t:${timestamp}:R>`
             );
           })
           .join("\n\n");
@@ -190,13 +200,13 @@ module.exports = {
           }
         )
         .setFooter({
-          text: "Studio PA • Moderation History",
+          text: "Studio PA ï¿½ Moderation History",
         })
         .setTimestamp();
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Mod-history command failed:", error);
@@ -204,7 +214,7 @@ module.exports = {
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
           content: "Failed to load moderation history.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

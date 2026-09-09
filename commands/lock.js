@@ -1,25 +1,20 @@
 const {
   EmbedBuilder,
+  PermissionFlagsBits,
   MessageFlags,
   SlashCommandBuilder,
 } = require("discord.js");
+
 const isAdmin = require("../utils/isAdmin");
 
 const {
-  clearWarnings,
   addModAction,
 } = require("../stores/moderationStore");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("clear-warnings")
-    .setDescription("Clear all manual warnings from a member")
-    .addUserOption((option) =>
-      option
-        .setName("member")
-        .setDescription("Member whose warnings should be cleared")
-        .setRequired(true)
-    ),
+    .setName("lock")
+    .setDescription("Lock the current channel"),
 
   async execute(interaction) {
     try {
@@ -30,20 +25,46 @@ module.exports = {
         });
       }
 
-      const user = interaction.options.getUser("member");
+      const channel = interaction.channel;
 
-      const removedCount =
-        clearWarnings(user.id);
+      if (!channel || !channel.isTextBased()) {
+        return interaction.reply({
+          content: "This command can only be used in a text channel.",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
 
-      addModAction(user.id, {
-        type: "Warnings Cleared",
+      const everyoneRole = interaction.guild.roles.everyone;
+      const botMember = interaction.guild.members.me;
+
+      if (
+        !botMember.permissions.has(
+          PermissionFlagsBits.ManageChannels
+        )
+      ) {
+        return interaction.reply({
+          content:
+            "Studio PA does not have the Manage Channels permission.",
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
+      await channel.permissionOverwrites.edit(
+        everyoneRole,
+        {
+          SendMessages: false,
+        }
+      );
+
+      addModAction(interaction.user.id, {
+        type: "Channel Lock",
         moderatorId: interaction.user.id,
-        reason: `${removedCount} warning(s) removed`,
+        reason: `Locked #${channel.name}`,
         source: "manual",
       });
 
       const logChannel =
-        interaction.guild.channels.cache.get(
+        await interaction.guild.channels.fetch(
           process.env.LOGGING_CHANNEL_ID
         );
 
@@ -52,26 +73,16 @@ module.exports = {
         logChannel.isTextBased()
       ) {
         const embed = new EmbedBuilder()
-          .setTitle("Warnings Cleared")
-          .setThumbnail(
-            user.displayAvatarURL({
-              size: 256,
-            })
-          )
+          .setTitle("\u{1F512} Channel Locked")
           .addFields(
             {
-              name: "Member",
-              value: `${user}`,
+              name: "Channel",
+              value: `${channel}`,
               inline: true,
             },
             {
               name: "Moderator",
               value: `${interaction.user}`,
-              inline: true,
-            },
-            {
-              name: "Warnings Removed",
-              value: String(removedCount),
               inline: true,
             }
           )
@@ -86,19 +97,15 @@ module.exports = {
       }
 
       await interaction.reply({
-        content:
-          `Cleared **${removedCount} warning(s)** from ${user}.`,
+        content: `\u{1F512} ${channel} has been locked.`,
         flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
-      console.error(
-        "Clear-warnings command failed:",
-        error
-      );
+      console.error("Lock command failed:", error);
 
-      if (!interaction.replied) {
+      if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
-          content: "Failed to clear warnings.",
+          content: "Failed to lock this channel.",
           flags: MessageFlags.Ephemeral,
         });
       }

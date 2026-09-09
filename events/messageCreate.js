@@ -3,15 +3,25 @@ const { EmbedBuilder } = require("discord.js");
 const {
   addMessageProtectionOffense,
   addModAction,
-} = require("../utils/moderationStore");
+} = require("../stores/moderationStore");
+
+const {
+  config,
+  getEscalationMinutes,
+} = require("../config/studioConfig");
 
 const recentMessages = new Map();
 
-const REPEAT_WINDOW_MS = 20 * 1000;
-const REPEAT_THRESHOLD = 3;
-const CAPS_MIN_LENGTH = 12;
-const CAPS_RATIO = 0.8;
-const REPEATED_CHAR_THRESHOLD = 8;
+const REPEAT_WINDOW_MS =
+  config.moderation.messageProtection.repeatedMessages.windowMs;
+const REPEAT_THRESHOLD =
+  config.moderation.messageProtection.repeatedMessages.count;
+const CAPS_MIN_LENGTH =
+  config.moderation.messageProtection.excessiveCaps.minimumLetters;
+const CAPS_RATIO =
+  config.moderation.messageProtection.excessiveCaps.ratio;
+const REPEATED_CHAR_THRESHOLD =
+  config.moderation.messageProtection.repeatedCharacters.count;
 
 function isMostlyCaps(content) {
   const letters = content.match(/[a-zA-Z]/g);
@@ -67,28 +77,26 @@ function isRepeatedMessage(message) {
 }
 
 function getEscalation(offenseCount) {
-  if (offenseCount === 3) {
-    return {
-      minutes: 10,
-      label: "10-minute timeout",
-    };
+  const minutes = getEscalationMinutes(
+    config.moderation.messageProtection.escalation,
+    offenseCount
+  );
+
+  if (minutes === null) {
+    return null;
   }
 
-  if (offenseCount === 4) {
-    return {
-      minutes: 60,
-      label: "1-hour timeout",
-    };
+  let label;
+
+  if (minutes === 10) {
+    label = "10-minute timeout";
+  } else if (minutes === 60) {
+    label = "1-hour timeout";
+  } else {
+    label = "24-hour timeout";
   }
 
-  if (offenseCount >= 5) {
-    return {
-      minutes: 1440,
-      label: "24-hour timeout",
-    };
-  }
-
-  return null;
+  return { minutes, label };
 }
 
 module.exports = {
@@ -246,7 +254,7 @@ module.exports = {
           )
           .setFooter({
             text:
-              "Studio PA • Message Protection",
+              "Studio PA ï¿½ Message Protection",
           })
           .setTimestamp();
 
@@ -286,7 +294,7 @@ module.exports = {
                 )
                 .setFooter({
                   text:
-                    "Studio PA • Renaissance VFX",
+                    "Studio PA ï¿½ Renaissance VFX",
                 })
                 .setTimestamp(),
             ],

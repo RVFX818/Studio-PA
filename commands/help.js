@@ -1,11 +1,16 @@
 const {
   EmbedBuilder,
   MessageFlags,
+  SlashCommandBuilder,
 } = require("discord.js");
 
 const isAdmin = require("../utils/isAdmin");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("help")
+    .setDescription("View Studio PA admin commands"),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
@@ -16,7 +21,7 @@ module.exports = {
       }
 
       const embed = new EmbedBuilder()
-        .setTitle("Studio PA • Admin Help")
+        .setTitle("Studio PA ï¿½ Admin Help")
         .setDescription(
           "Available Studio PA administration and moderation commands."
         )
@@ -24,25 +29,25 @@ module.exports = {
           {
             name: "Moderation",
             value: [
-              "`/warn` — Add a manual warning",
-              "`/warnings` — View warning history",
-              "`/remove-warning` — Remove one warning",
-              "`/clear-warnings` — Clear all manual warnings",
-              "`/mod-history` — View full moderation history",
-              "`/timeout` — Temporarily timeout a member",
-              "`/untimeout` — Remove a timeout",
-              "`/kick` — Remove a member from the server",
-              "`/ban` — Ban a member",
-              "`/purge` — Delete recent messages",
+              "`/warn` ï¿½ Add a manual warning",
+              "`/warnings` ï¿½ View warning history",
+              "`/remove-warning` ï¿½ Remove one warning",
+              "`/clear-warnings` ï¿½ Clear all manual warnings",
+              "`/mod-history` ï¿½ View full moderation history",
+              "`/timeout` ï¿½ Temporarily timeout a member",
+              "`/untimeout` ï¿½ Remove a timeout",
+              "`/kick` ï¿½ Remove a member from the server",
+              "`/ban` ï¿½ Ban a member",
+              "`/purge` ï¿½ Delete recent messages",
             ].join("\n"),
             inline: false,
           },
           {
             name: "Studio Management",
             value: [
-              "`/post-info` — Post the Renaissance VFX info embed",
-              "`/status` — View bot uptime, ping, memory, and health",
-              "`/help` — Show this command guide",
+              "`/post-info` ï¿½ Post the Renaissance VFX info embed",
+              "`/status` ï¿½ View bot uptime, ping, memory, and health",
+              "`/help` ï¿½ Show this command guide",
             ].join("\n"),
             inline: false,
           },
@@ -67,7 +72,7 @@ module.exports = {
           }
         )
         .setFooter({
-          text: "Studio PA • Renaissance VFX",
+          text: "Studio PA ï¿½ Renaissance VFX",
         })
         .setTimestamp();
 

@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require("discord.js");
 
 const isAdmin = require("../utils/isAdmin");
 
@@ -27,12 +27,16 @@ function formatBytes(bytes) {
 }
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("status")
+    .setDescription("View Studio PA system status"),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
         return interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -97,19 +101,19 @@ module.exports = {
           {
             name: "Moderation Data",
             value: moderationDataExists
-              ? `Available • ${moderationDataSize}`
+              ? `Available ï¿½ ${moderationDataSize}`
               : "Missing",
             inline: true,
           }
         )
         .setFooter({
-          text: "Studio PA • System Status",
+          text: "Studio PA ï¿½ System Status",
         })
         .setTimestamp();
 
       await interaction.reply({
         embeds: [embed],
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Status command failed:", error);
@@ -117,7 +121,7 @@ module.exports = {
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
           content: "Failed to load Studio PA status.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

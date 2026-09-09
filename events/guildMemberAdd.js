@@ -1,12 +1,20 @@
 const { EmbedBuilder } = require("discord.js");
 
+const {
+  config,
+} = require("../config/studioConfig");
+
 const joins = [];
 
-const RAID_WINDOW_MS = 60 * 1000;
-const RAID_THRESHOLD = 8;
+const RAID_WINDOW_MS =
+  config.moderation.raidProtection.windowMs;
+const RAID_THRESHOLD =
+  config.moderation.raidProtection.joinThreshold;
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const SEVEN_DAYS_MS = 7 * ONE_DAY_MS;
+const ONE_DAY_MS =
+  config.moderation.newAccountRisk.highRiskAgeMs;
+const SEVEN_DAYS_MS =
+  config.moderation.newAccountRisk.cautionAgeMs;
 
 module.exports = {
   async execute(member) {
@@ -85,7 +93,7 @@ module.exports = {
             )
             .setFooter({
               text:
-                "Studio PA • Join Protection",
+                "Studio PA ï¿½ Join Protection",
             })
             .setTimestamp();
 
@@ -150,7 +158,7 @@ module.exports = {
         )
         .setFooter({
           text:
-            "Studio PA • Raid Protection",
+            "Studio PA ï¿½ Raid Protection",
         })
         .setTimestamp();
 

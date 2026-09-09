@@ -1,20 +1,39 @@
 const {
   EmbedBuilder,
+  MessageFlags,
+  SlashCommandBuilder,
 } = require("discord.js");
 
 const isAdmin = require("../utils/isAdmin");
 
 const {
   addModAction,
-} = require("../utils/moderationStore");
+} = require("../stores/moderationStore");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("kick")
+    .setDescription("Kick a member")
+    .addUserOption((option) =>
+      option
+        .setName("member")
+        .setDescription("Member to kick")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for the kick")
+        .setRequired(false)
+        .setMaxLength(500)
+    ),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
         return interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -34,7 +53,7 @@ module.exports = {
         return interaction.reply({
           content:
             "I cannot kick that member. Check the role hierarchy.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -80,7 +99,7 @@ module.exports = {
           )
           .setFooter({
             text:
-              "Studio PA • Moderation",
+              "Studio PA ï¿½ Moderation",
           })
           .setTimestamp();
 
@@ -95,7 +114,7 @@ module.exports = {
         content:
           `${targetUser.tag} was kicked.\n` +
           `Reason: ${reason}`,
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error(
@@ -110,7 +129,7 @@ module.exports = {
         await interaction.reply({
           content:
             "Failed to kick that member.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

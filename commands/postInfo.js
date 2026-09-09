@@ -1,12 +1,16 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("post-info")
+    .setDescription("Post the Renaissance VFX info embed"),
+
   async execute(interaction) {
     try {
       if (!interaction.inGuild()) {
         await interaction.reply({
           content: "This command can only be used inside the server.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -33,7 +37,7 @@ module.exports = {
       if (!member.roles.cache.has(adminRoleId)) {
         await interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -45,7 +49,7 @@ module.exports = {
       if (!channel || !channel.isTextBased()) {
         await interaction.reply({
           content: "The info channel could not be found.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
         return;
       }
@@ -88,7 +92,7 @@ module.exports = {
           ].join("\n")
         )
         .setFooter({
-          text: "Studio PA • Renaissance VFX",
+          text: "Studio PA ï¿½ Renaissance VFX",
         });
 
       await channel.send({
@@ -97,7 +101,7 @@ module.exports = {
 
       await interaction.reply({
         content: "Info embed posted.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Failed to post info embed:", error);
@@ -105,7 +109,7 @@ module.exports = {
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
           content: "Failed to post the info embed.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

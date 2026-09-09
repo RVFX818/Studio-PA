@@ -1,18 +1,35 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require("discord.js");
 
 const isAdmin = require("../utils/isAdmin");
 
 const {
   addWarning,
-} = require("../utils/moderationStore");
+} = require("../stores/moderationStore");
 
 module.exports = {
+  data: new SlashCommandBuilder()
+    .setName("warn")
+    .setDescription("Warn a member")
+    .addUserOption((option) =>
+      option
+        .setName("member")
+        .setDescription("Member to warn")
+        .setRequired(true)
+    )
+    .addStringOption((option) =>
+      option
+        .setName("reason")
+        .setDescription("Reason for the warning")
+        .setRequired(true)
+        .setMaxLength(500)
+    ),
+
   async execute(interaction) {
     try {
       if (!(await isAdmin(interaction))) {
         return interaction.reply({
           content: "You do not have permission to use this command.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -22,14 +39,14 @@ module.exports = {
       if (user.bot) {
         return interaction.reply({
           content: "You cannot warn a bot.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
       if (user.id === interaction.user.id) {
         return interaction.reply({
           content: "You cannot warn yourself.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
 
@@ -77,7 +94,7 @@ module.exports = {
           }
         )
         .setFooter({
-          text: "Studio PA • Moderation",
+          text: "Studio PA ï¿½ Moderation",
         })
         .setTimestamp();
 
@@ -111,7 +128,7 @@ module.exports = {
                 }
               )
               .setFooter({
-                text: "Studio PA • Renaissance VFX",
+                text: "Studio PA ï¿½ Renaissance VFX",
               })
               .setTimestamp(),
           ],
@@ -126,7 +143,7 @@ module.exports = {
           (dmSent
             ? ""
             : "\nTheir DMs are closed, so I could not notify them privately."),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       });
     } catch (error) {
       console.error("Warn command failed:", error);
@@ -134,7 +151,7 @@ module.exports = {
       if (!interaction.replied) {
         await interaction.reply({
           content: "Failed to warn that member.",
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

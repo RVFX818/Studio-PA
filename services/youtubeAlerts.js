@@ -1,4 +1,4 @@
-const fs = require("fs");
+﻿const fs = require("fs");
 const path = require("path");
 const {
   EmbedBuilder,
@@ -9,14 +9,12 @@ const {
   config,
 } = require("../config/studioConfig");
 
-const DATA_DIRECTORY =
-  path.join(__dirname, "..", "data");
+const {
+  dataDirectory: DATA_DIRECTORY,
+  getDataFile,
+} = require("../utils/runtimeData");
 
-const DATA_FILE =
-  path.join(
-    DATA_DIRECTORY,
-    config.storage.youtubeFile
-  );
+const DATA_FILE = getDataFile(config.storage.youtubeFile);
 
 let checkRunning = false;
 let intervalHandle = null;
@@ -235,7 +233,7 @@ async function sendVideoAlert(
       })
       .setFooter({
         text:
-          `${config.youtube.channelName} � YouTube`,
+          `${config.youtube.channelName} • YouTube`,
       });
 
   if (video.published) {
@@ -518,3 +516,4 @@ module.exports = {
   startYouTubeAlerts,
   checkYouTube,
 };
+

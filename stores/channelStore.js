@@ -1,4 +1,4 @@
-const fs = require("fs");
+﻿const fs = require("fs");
 const path = require("path");
 
 const dataDirectory = path.join(__dirname, "..", "data");
@@ -71,3 +71,4 @@ module.exports = {
   saveOriginalSlowmode,
   clearSavedSlowmode,
 };
+

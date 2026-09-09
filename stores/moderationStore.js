@@ -1,4 +1,4 @@
-const fs = require("fs");
+﻿const fs = require("fs");
 const path = require("path");
 
 const dataPath = path.join(
@@ -187,3 +187,4 @@ module.exports = {
   addModAction,
   getUserRecord,
 };
+

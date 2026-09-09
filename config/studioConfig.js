@@ -1,8 +1,14 @@
-const MINUTE = 60 * 1000;
+﻿const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
 const config = {
+  app: {
+    environment:
+      process.env.APP_ENV ||
+      "development",
+  },
+
   discord: {
     guildId: process.env.GUILD_ID,
 
@@ -77,7 +83,10 @@ const config = {
   },
 
   youtube: {
-    enabled: true,
+    enabled:
+      String(
+        process.env.YOUTUBE_ALERTS_ENABLED
+      ).toLowerCase() === "true",
 
     apiKey:
       process.env.YOUTUBE_API_KEY,

@@ -1,15 +1,17 @@
-const fs = require("fs");
+﻿const fs = require("fs");
 const path = require("path");
 const { EmbedBuilder } = require("discord.js");
 
-const DATA_DIRECTORY =
-  path.join(__dirname, "..", "data");
+const {
+  findManagedMessage,
+} = require("../utils/managedMessage");
 
-const DATA_FILE =
-  path.join(
-    DATA_DIRECTORY,
-    "infoMessage.json"
-  );
+const {
+  dataDirectory: DATA_DIRECTORY,
+  getDataFile,
+} = require("../utils/runtimeData");
+
+const DATA_FILE = getDataFile("infoMessage.json");
 
 const THUMBNAIL_PATH =
   path.join(
@@ -285,3 +287,5 @@ module.exports = {
   buildInfoEmbeds,
   syncInfoMessage,
 };
+
+

@@ -3,15 +3,12 @@ const path = require("path");
 const { EmbedBuilder } = require("discord.js");
 
 const {
-  findManagedMessage,
-} = require("../utils/managedMessage");
-
-const {
   dataDirectory: DATA_DIRECTORY,
   getDataFile,
 } = require("../utils/runtimeData");
 
-const DATA_FILE = getDataFile("infoMessage.json");
+const DATA_FILE =
+  getDataFile("infoMessage.json");
 
 const THUMBNAIL_PATH =
   path.join(
@@ -83,96 +80,103 @@ function writeStore(data) {
   );
 }
 
-function buildInfoEmbeds() {
-  const socialsEmbed =
+async function findInfoMessage(
+  channel,
+  botUserId
+) {
+  let before;
+
+  for (let page = 0; page < 5; page++) {
+    const options = {
+      limit: 100,
+    };
+
+    if (before) {
+      options.before = before;
+    }
+
+    const messages =
+      await channel.messages.fetch(
+        options
+      );
+
+    const match =
+      messages.find(
+        (message) =>
+          message.author?.id ===
+            botUserId &&
+          message.embeds?.[0]?.title ===
+            "📌｜INFO"
+      );
+
+    if (match) {
+      return match;
+    }
+
+    if (messages.size < 100) {
+      break;
+    }
+
+    before =
+      messages.last()?.id;
+
+    if (!before) {
+      break;
+    }
+  }
+
+  return null;
+}
+
+function buildInfoEmbeds(serverName) {
+  const headerEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{1F310} Socials"
+        "📌｜INFO"
       )
       .setThumbnail(
         `attachment://${THUMBNAIL_NAME}`
       )
       .setDescription(
-        [
-          "[**Official YouTube Channel**](https://youtube.com/@renaissancevfx)",
-          "Official videos, trailers, and studio releases",
-          "",
-          "[**Second YouTube Channel**](https://www.youtube.com/@RVFXStudio)",
-          "Extra content, behind-the-scenes videos, experiments, and bonus uploads",
-          "",
-          "[**Twitch**](https://www.twitch.tv/rvfxstudio)",
-          "Live streams",
-          "",
-          "[**Instagram**](https://www.instagram.com/renaissancevfx/)",
-          "Shorts, image posts, and quick updates",
-          "",
-          "[**TikTok**](https://www.tiktok.com/@renaissance.vfx)",
-          "Short-form videos, clips, and studio content",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
+        "Quick links and information about Renaissance VFX, RVFX Studio, and this community."
+      );
 
-  const supporterEmbed =
+  const infoEmbed =
     new EmbedBuilder()
-      .setTitle(
-        "\u{2B50} Supporter Access"
-      )
+      .setColor(0xB71C1C)
       .setDescription(
         [
-          "Join us on **[Patreon](https://patreon.com/RenaissanceVFX)** to unlock exclusive supporter access.",
+          `💬 **${serverName} Discord**`,
+          "This server brings together the Renaissance VFX professional team and the RVFX Studio community. It’s a place to follow updates, connect with creatives, join discussions, and get involved with casting, opportunities, and community projects.",
           "",
-          "Already a patron? Join the Discord through Patreon so your account links correctly and your perks unlock automatically.",
+          "🎥 **Renaissance VFX**",
+          "Renaissance VFX is our cinematic production and visual effects studio, focused on trailers, launch films, VFX, and ambitious branded content.",
+          "**[renaissancevfx.com](https://www.renaissancevfx.com)**",
+          "",
+          "🎬 **RVFX Studio**",
+          "RVFX Studio is our community and talent side, where we share casting calls, creative opportunities, auditions, and ways to get involved with upcoming projects.",
+          "**[rvfxstudio.com](https://www.rvfxstudio.com)**",
+          "",
+          "🌐 **Official Links**",
+          "[Main YouTube - Renaissance VFX](https://youtube.com/@renaissancevfx)",
+          "[Second YouTube - RVFX Studio](https://www.youtube.com/@RVFXStudio)",
+          "[Twitch](https://www.twitch.tv/rvfxstudio)",
+          "[Instagram](https://www.instagram.com/renaissancevfx/)",
+          "[TikTok](https://www.tiktok.com/@renaissance.vfx)",
+          "",
+          "⭐ **Support RVFX**",
+          "Join us on **[Patreon](https://patreon.com/RenaissanceVFX)** for supporter access, exclusive content, and community perks.",
         ].join("\n")
       )
       .setFooter({
         text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
-
-  const rvfxStudioEmbed =
-    new EmbedBuilder()
-      .setTitle(
-        "\u{1F3AC} RVFX Studio"
-      )
-      .setDescription(
-        [
-          "**Interested in joining a production?**",
-          "",
-          "Explore auditions, open roles, and official project opportunities through **RVFX Studio**.",
-          "",
-          "**[www.rvfxstudio.com](https://www.rvfxstudio.com)**",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
-
-  const renaissanceVfxEmbed =
-    new EmbedBuilder()
-      .setTitle(
-        "\u{1F3A5} Renaissance VFX"
-      )
-      .setDescription(
-        [
-          "Our official services website for cinematic production, VFX, trailers, advertisements, and client collaborations.",
-          "",
-          "**[www.renaissancevfx.com](https://www.renaissancevfx.com)**",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
+          "Studio PA • Renaissance VFX",
       });
 
   return [
-    socialsEmbed,
-    supporterEmbed,
-    rvfxStudioEmbed,
-    renaissanceVfxEmbed,
+    headerEmbed,
+    infoEmbed,
   ];
 }
 
@@ -207,8 +211,12 @@ async function syncInfoMessage(client) {
       );
     }
 
+    const serverName =
+      channel.guild?.name ||
+      "RVFX";
+
     const embeds =
-      buildInfoEmbeds();
+      buildInfoEmbeds(serverName);
 
     const files = [
       {
@@ -247,9 +255,39 @@ async function syncInfoMessage(client) {
         };
       } catch (error) {
         console.log(
-          "Saved info message not found. Creating a new one."
+          "Saved info message not found. Looking for existing managed message."
         );
       }
+    }
+
+    const recoveredMessage =
+      await findInfoMessage(
+        channel,
+        client.user.id
+      );
+
+    if (recoveredMessage) {
+      await recoveredMessage.edit({
+        embeds,
+        files,
+        attachments: [],
+      });
+
+      writeStore({
+        messageId:
+          recoveredMessage.id,
+      });
+
+      console.log(
+        `Info message recovered and updated: ${recoveredMessage.id}`
+      );
+
+      return {
+        message:
+          recoveredMessage,
+        created:
+          false,
+      };
     }
 
     const newMessage =
@@ -287,5 +325,4 @@ module.exports = {
   buildInfoEmbeds,
   syncInfoMessage,
 };
-
 

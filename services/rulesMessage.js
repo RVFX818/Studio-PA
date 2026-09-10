@@ -3,15 +3,12 @@ const path = require("path");
 const { EmbedBuilder } = require("discord.js");
 
 const {
-  findManagedMessage,
-} = require("../utils/managedMessage");
-
-const {
   dataDirectory: DATA_DIRECTORY,
   getDataFile,
 } = require("../utils/runtimeData");
 
-const DATA_FILE = getDataFile("rulesMessage.json");
+const DATA_FILE =
+  getDataFile("rulesMessage.json");
 
 const THUMBNAIL_PATH =
   path.join(
@@ -83,111 +80,125 @@ function writeStore(data) {
   );
 }
 
+async function findRulesMessage(
+  channel,
+  botUserId
+) {
+  let before;
+
+  for (let page = 0; page < 5; page++) {
+    const options = {
+      limit: 100,
+    };
+
+    if (before) {
+      options.before = before;
+    }
+
+    const messages =
+      await channel.messages.fetch(
+        options
+      );
+
+    const match =
+      messages.find(
+        (message) =>
+          message.author?.id ===
+            botUserId &&
+          message.embeds?.[0]?.title ===
+            "✅｜RULES"
+      );
+
+    if (match) {
+      return match;
+    }
+
+    if (messages.size < 100) {
+      break;
+    }
+
+    before =
+      messages.last()?.id;
+
+    if (!before) {
+      break;
+    }
+  }
+
+  return null;
+}
+
 function buildRulesEmbeds() {
-  const introEmbed =
+  const headerEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{1F4DC} Server Rules & Guidelines"
+        "✅｜RULES"
       )
       .setThumbnail(
         `attachment://${THUMBNAIL_NAME}`
       )
       .setDescription(
-        [
-          "**Welcome!** Please take a moment to read the rules below.",
-          "",
-          "These guidelines help keep the community safe, respectful, and enjoyable for everyone.",
-          "",
-          "By participating in this server, you agree to use good judgment when communicating, posting, sharing links, or uploading files.",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
+        "Please carefully review the community rules and safety guidelines below before participating in the server."
+      );
 
   const rulesEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{1F9ED} Community Rules"
+        "🧭 Community Rules"
       )
       .setDescription(
         [
-          "\u{1F603} **1. Be cool, kind, and respectful to one another.**",
+          "These guidelines help keep the community safe, respectful, and enjoyable for everyone.",
+          "By participating in this server, you agree to use good judgment when communicating, posting, sharing links, or uploading files.",
           "",
-          "\u{1F4C7} **2. Keep your Discord profile appropriate.**",
+          "😃 **1. Be cool, kind, and respectful to one another.**",
           "",
-          "\u{2709}\u{FE0F} **3. Do not spam.**",
+          "📇 **2. Keep your Discord profile appropriate.**",
           "",
-          "\u{1F514} **4. Do not @mention or directly message staff unless necessary or invited to do so.**",
+          "🚫 **3. Do not spam.**",
           "",
-          "\u{1F4E3} **5. No self-promotion or advertisements.**",
+          "🔔 **4. Do not @mention or directly message staff unless necessary or invited to do so.**",
           "",
-          "\u{1F6E1}\u{FE0F} **6. Do not share personal information.**",
+          "📣 **5. No self-promotion or advertisements.**",
           "",
-          "\u{1F92C} **7. No hate speech, harassment, threats, or harmful language.**",
+          "🛡️ **6. Do not share personal information.**",
           "",
-          "\u{1F3DB}\u{FE0F} **8. No political or religious discussions.**",
+          "🤬 **7. No hate speech, harassment, threats, or harmful language.**",
           "",
-          "\u{1F6A8} **9. No piracy, sexual content, NSFW content, malware, scams, or otherwise suspicious material.**",
+          "🏛️ **8. No political or religious discussions.**",
           "",
-          "\u{1F914} **10. Rules are subject to common sense and moderator discretion.**",
+          "🚨 **9. No piracy, sexual content, NSFW content, malware, scams, or otherwise suspicious material.**",
+          "",
+          "🤔 **10. Rules are subject to common sense and moderator discretion.**",
         ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
+      );
 
   const safetyEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{203C}\u{FE0F} File & Link Safety Notice"
+        "‼️ File & Link Safety"
       )
       .setDescription(
         [
-          "This is a community server where members may share artwork, files, links, and other creative materials.",
-          "",
+          "Members may share artwork, files, links, and other creative materials.",
           "For your safety, **do not download files from users you do not know or trust**.",
           "",
-          "The server team cannot guarantee that every file or link shared by members is safe.",
-          "",
-          "Be cautious with unexpected downloads, shortened links, executables, archives, scripts, or anything that appears suspicious.",
-          "",
-          "By participating in this server, you are responsible for your own device security and online safety.",
+          "Use caution with unexpected downloads, shortened links, executables, archives, scripts, or anything that appears suspicious.",
+          "You are responsible for your own device security and online safety.",
         ].join("\n")
       )
       .setFooter({
         text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
-
-  const discordEmbed =
-    new EmbedBuilder()
-      .setTitle(
-        "\u{2705} Discord Terms & Age Requirement"
-      )
-      .setDescription(
-        [
-          "Participation in this server requires compliance with Discord's **Terms of Service** and **Community Guidelines**.",
-          "",
-          "By using Discord, you must also meet the minimum age of digital consent required in your country.",
-          "",
-          "**[Discord Terms of Service](https://discord.com/terms)**",
-          "",
-          "**[Discord Community Guidelines](https://discord.com/guidelines)**",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
+          "Studio PA • Renaissance VFX",
       });
 
   return [
-    introEmbed,
+    headerEmbed,
     rulesEmbed,
     safetyEmbed,
-    discordEmbed,
   ];
 }
 
@@ -262,9 +273,39 @@ async function syncRulesMessage(client) {
         };
       } catch (error) {
         console.log(
-          "Saved rules message not found. Creating a new one."
+          "Saved rules message not found. Looking for existing managed message."
         );
       }
+    }
+
+    const recoveredMessage =
+      await findRulesMessage(
+        channel,
+        client.user.id
+      );
+
+    if (recoveredMessage) {
+      await recoveredMessage.edit({
+        embeds,
+        files,
+        attachments: [],
+      });
+
+      writeStore({
+        messageId:
+          recoveredMessage.id,
+      });
+
+      console.log(
+        `Rules message recovered and updated: ${recoveredMessage.id}`
+      );
+
+      return {
+        message:
+          recoveredMessage,
+        created:
+          false,
+      };
     }
 
     const newMessage =
@@ -302,5 +343,7 @@ module.exports = {
   buildRulesEmbeds,
   syncRulesMessage,
 };
+
+
 
 

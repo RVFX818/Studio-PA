@@ -3,15 +3,12 @@ const path = require("path");
 const { EmbedBuilder } = require("discord.js");
 
 const {
-  findManagedMessage,
-} = require("../utils/managedMessage");
-
-const {
   dataDirectory: DATA_DIRECTORY,
   getDataFile,
 } = require("../utils/runtimeData");
 
-const DATA_FILE = getDataFile("faqMessage.json");
+const DATA_FILE =
+  getDataFile("faqMessage.json");
 
 const THUMBNAIL_PATH =
   path.join(
@@ -83,149 +80,226 @@ function writeStore(data) {
   );
 }
 
+function channelMention(channelId) {
+  return channelId
+    ? `<#${channelId}>`
+    : "Channel unavailable";
+}
+
+async function findFaqMessage(
+  channel,
+  botUserId
+) {
+  let before;
+
+  for (let page = 0; page < 5; page++) {
+    const options = {
+      limit: 100,
+    };
+
+    if (before) {
+      options.before = before;
+    }
+
+    const messages =
+      await channel.messages.fetch(
+        options
+      );
+
+    const match =
+      messages.find(
+        (message) =>
+          message.author?.id ===
+            botUserId &&
+          message.embeds?.[0]?.title ===
+            "❓｜FAQ"
+      );
+
+    if (match) {
+      return match;
+    }
+
+    if (messages.size < 100) {
+      break;
+    }
+
+    before =
+      messages.last()?.id;
+
+    if (!before) {
+      break;
+    }
+  }
+
+  return null;
+}
+
 function buildFaqEmbeds() {
-  const introEmbed =
+  const generalChat =
+    channelMention(
+      process.env.GENERAL_CHAT_CHANNEL_ID
+    );
+
+  const offTopicChat =
+    channelMention(
+      process.env.OFF_TOPIC_CHAT_CHANNEL_ID
+    );
+
+  const artShowcase =
+    channelMention(
+      process.env.ART_SHOWCASE_CHANNEL_ID
+    );
+
+  const announcements =
+    channelMention(
+      process.env.ANNOUNCEMENTS_CHANNEL_ID
+    );
+
+  const creatorRoom =
+    channelMention(
+      process.env.CREATOR_ROOM_CHANNEL_ID
+    );
+
+  const memeGallery =
+    channelMention(
+      process.env.MEME_GALLERY_CHANNEL_ID
+    );
+
+  const hallOfFame =
+    channelMention(
+      process.env.HALL_OF_FAME_CHANNEL_ID
+    );
+
+  const suggestionBox =
+    channelMention(
+      process.env.SUGGESTION_BOX_CHANNEL_ID
+    );
+
+  const stage =
+    channelMention(
+      process.env.STAGE_CHANNEL_ID
+    );
+
+  const chronicle =
+    channelMention(
+      process.env.CHRONICLE_CHANNEL_ID
+    );
+
+  const headerEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{2753} RVFX Studio FAQ"
+        "❓｜FAQ"
       )
       .setThumbnail(
         `attachment://${THUMBNAIL_NAME}`
       )
       .setDescription(
-        [
-          "Welcome to the **RVFX Studio FAQ**.",
-          "",
-          "Below you'll find answers to common questions about the community, sharing your work, contacting the team, joining productions, and supporter access.",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
+        "Quick answers and helpful links for navigating the RVFX community."
+      );
 
-  const studioEmbed =
+  const communityEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{1F3AC} What is RVFX Studio?"
+        "💬 Community & Channels"
       )
       .setDescription(
         [
-          "**RVFX Studio** is the community and creative side of **Renaissance VFX**.",
+          "**RVFX and project discussion**",
+          generalChat,
           "",
-          "It's where we bring artists, performers, and creators together to collaborate on cinematic shorts, fan projects, trailers, VFX, animation, and behind-the-scenes content.",
+          "**Casual chat and general questions**",
+          offTopicChat,
+          "",
+          "**Memes and community humor**",
+          memeGallery,
+          "",
+          "**Community highlights and memorable moments**",
+          hallOfFame,
+          "",
+          "**Ideas, feedback, and suggestions**",
+          suggestionBox,
+          "",
+          "🖼️ **Where do I share my art or personal projects?**",
+          "Share finished artwork, videos, edits, writing, 3D work, builds, and other personal creative work here:",
+          artShowcase,
+          "Work-in-progress posts are not permitted in this channel and may be removed. Please share only finished art pieces or completed creative work that you're excited to show.",
+          "",
+          "📖 **Where can I find community updates and records?**",
+          "Meeting notes, vote results, community records, and other ongoing updates:",
+          chronicle,
         ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
-
-  const chatEmbed =
-    new EmbedBuilder()
-      .setTitle(
-        "\u{1F4AC} Where can I chat?"
-      )
-      .setDescription(
-        [
-          "Use **#general-chat** for conversations about Renaissance VFX, our projects, community updates, and related topics.",
-          "",
-          "Use **#off-topic-chat** for casual conversations that aren't directly related to RVFX or our projects.",
-          "",
-          "Please keep all community spaces respectful, friendly, and welcoming.",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
-
-  const artEmbed =
-    new EmbedBuilder()
-      .setTitle(
-        "\u{1F5BC}\u{FE0F} Where do I share my art or personal projects?"
-      )
-      .setDescription(
-        [
-          "Share your finished creative work in **#art-showcase**.",
-          "",
-          "Finished artwork, videos, edits, writing, 3D work, builds, and other personal creative projects are welcome as long as they fit the channel and aren't overly promotional or spammy.",
-          "",
-          "**Work-in-progress (WIP)** posts should stay out of finished-work channels unless the channel specifically allows them.",
-          "",
-          "WIP posts may be removed or redirected to a more appropriate space.",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
-
-  const questionsEmbed =
-    new EmbedBuilder()
-      .setTitle(
-        "\u{1F64B} Where do I ask the team questions?"
-      )
-      .setDescription(
-        [
-          "Please do not **@mention team members directly** for general questions.",
-          "",
-          "Instead, ask your question in **#off-topic**.",
-          "",
-          "A team member may respond when available, and if no one from the team is around, someone from the community may still be able to help.",
-        ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
+      );
 
   const productionEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{1F3A5} How can I contribute to a production?"
+        "🎬 Productions"
       )
       .setDescription(
         [
-          "There are several ways to contribute to an **RVFX Studio** production, including acting, voice work, VFX, animation, 3D art, editing, writing, and other creative or production support.",
+          "🎥 **How can I contribute to a production?**",
+          "RVFX Studio opportunities may include acting, voice work, VFX, animation, 3D art, editing, writing, and other creative or production support.",
           "",
-          "Open roles and contribution opportunities are posted on **[RVFX Studio](https://www.rvfxstudio.com/)** and announced in **#announcements**.",
+          "Open roles are posted on **[RVFX Studio](https://www.rvfxstudio.com/)** and announced here:",
+          announcements,
           "",
           "If a role matches your skills or interests, follow the application instructions on the opportunity page.",
         ].join("\n")
-      )
-      .setFooter({
-        text:
-          "Studio PA \u{2022} Renaissance VFX",
-      });
+      );
 
   const supporterEmbed =
     new EmbedBuilder()
+      .setColor(0xB71C1C)
       .setTitle(
-        "\u{2B50} How do I get supporter access?"
+        "⭐ Supporters"
       )
       .setDescription(
         [
+          "⭐ **How do I get supporter access?**",
           "Supporter access is connected to our **[Patreon](https://patreon.com/RenaissanceVFX)**.",
+          "Already a patron? Connect your Discord account through Patreon to receive your supporter role and access automatically.",
           "",
-          "Once you become a supporter, connect your Discord account to Patreon. Your supporter role and access to the appropriate channels should be granted automatically.",
+          "🎨 **What does becoming a supporter get me in this server?**",
+          "Supporters receive additional community perks, including:",
           "",
-          "If your access doesn't appear right away, make sure your Discord account is properly connected to your Patreon account.",
+          "• Supporter roles and exclusive role colors",
+          "",
+          "• Access to the **Creator Room** where you can vote, share feedback, and help shape future projects:",
+          creatorRoom,
+          "",
+          "• Access to community events and conversations with members of the Renaissance VFX professional team:",
+          stage,
+        ].join("\n")
+      );
+
+  const discordEmbed =
+    new EmbedBuilder()
+      .setColor(0xB71C1C)
+      .setTitle(
+        "✅ Discord Guidelines"
+      )
+      .setDescription(
+        [
+          "Use of this server is also subject to Discord's Terms of Service and Community Guidelines.",
+          "",
+          "**[Discord Terms of Service](https://discord.com/terms)**",
+          "**[Discord Community Guidelines](https://discord.com/guidelines)**",
         ].join("\n")
       )
       .setFooter({
         text:
-          "Studio PA \u{2022} Renaissance VFX",
+          "Studio PA • Renaissance VFX",
       });
 
   return [
-    introEmbed,
-    studioEmbed,
-    chatEmbed,
-    artEmbed,
-    questionsEmbed,
+    headerEmbed,
+    communityEmbed,
     productionEmbed,
     supporterEmbed,
+    discordEmbed,
   ];
 }
 
@@ -300,9 +374,39 @@ async function syncFaqMessage(client) {
         };
       } catch (error) {
         console.log(
-          "Saved FAQ message not found. Creating a new one."
+          "Saved FAQ message not found. Looking for existing managed message."
         );
       }
+    }
+
+    const recoveredMessage =
+      await findFaqMessage(
+        channel,
+        client.user.id
+      );
+
+    if (recoveredMessage) {
+      await recoveredMessage.edit({
+        embeds,
+        files,
+        attachments: [],
+      });
+
+      writeStore({
+        messageId:
+          recoveredMessage.id,
+      });
+
+      console.log(
+        `FAQ message recovered and updated: ${recoveredMessage.id}`
+      );
+
+      return {
+        message:
+          recoveredMessage,
+        created:
+          false,
+      };
     }
 
     const newMessage =
@@ -340,5 +444,3 @@ module.exports = {
   buildFaqEmbeds,
   syncFaqMessage,
 };
-
-
